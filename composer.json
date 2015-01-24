@@ -11,5 +11,15 @@
             "email": "maartenstaa@gmail.com"
         }
     ],
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "MaartenStaa\\Routing": "src/MaartenStaa/Routing/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MaartenStaa\\Routing": "tests/MaartenStaa/Routing/"
+        }
+    }
 }
