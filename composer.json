@@ -2,7 +2,7 @@
     "name": "maartenstaa/laravel-41-route-caching",
     "description": "This package allows you to cache your routes definitions, thereby speeding up each request.",
     "require": {
-        "laravel/framework": "4.1"
+        "laravel/framework": "4.1.*"
     },
     "license": "BSD-3-Clause",
     "authors": [
