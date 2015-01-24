@@ -48,6 +48,16 @@ class RouteCollection extends LaravelRouteCollection
     protected $backup;
 
     /**
+     * Get the backed up routes.
+     *
+     * @return array
+     */
+    public function getBackup()
+    {
+        return $this->backup;
+    }
+
+    /**
      * Save the current collection of routes to the backup to start with an empty
      * collection to cache.
      */
@@ -107,7 +117,7 @@ class RouteCollection extends LaravelRouteCollection
      */
     protected function restoreRoutes($routes)
     {
-        foreach ($cache as $k => $v) {
+        foreach ($routes as $k => $v) {
             if ($k === 'routes') {
                 $this->$k = $this->mergeGroupedRoutes($this->$k, $v);
             } else {
@@ -125,7 +135,7 @@ class RouteCollection extends LaravelRouteCollection
      */
     public function mergeGroupedRoutes(array $r1, array $r2)
     {
-        $methods = array('GET', 'POST', 'HEAD', 'PATH', 'PUT');
+        $methods = array('GET', 'POST', 'HEAD', 'PATH', 'PUT', 'DELETE');
         foreach ($methods as $method) {
             if (isset($r2[$method]) === false) {
                 continue;

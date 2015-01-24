@@ -37,6 +37,7 @@
 use Closure;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Routing\Route;
 use Illuminate\Routing\Router as LaravelRouter;
 
 class Router extends LaravelRouter
@@ -58,9 +59,10 @@ class Router extends LaravelRouter
      * Indicate that the routes that are defined in the given callback
      * should be cached.
      *
-     * @param string  $filename
-     * @param Closure $callback
-     * @param int     $cacheMinutes
+     * @param  string  $filename
+     * @param  Closure $callback
+     * @param  int     $cacheMinutes
+     * @return string
      */
     public function cache($filename, Closure $callback, $cacheMinutes = 1440)
     {
@@ -84,5 +86,62 @@ class Router extends LaravelRouter
             // And restore the routes that shouldn't be cached.
             $this->routes->restoreRouteCollection();
         }
+
+        return $cacheKey;
+    }
+
+    /**
+     * Add a controller based route action to the action array.
+     *
+     * @param  array|string  $action
+     * @return array
+     */
+    protected function getControllerAction($action)
+    {
+        if (is_string($action)) {
+            $action = array('uses' => $action);
+        }
+
+        // Here we'll get an instance of this controller dispatcher and hand it off to
+        // the Closure so it will be used to resolve the class instances out of our
+        // IoC container instance and call the appropriate methods on the class.
+        if (count($this->groupStack) > 0) {
+            $action['uses'] = $this->prependGroupUses($action['uses']);
+        }
+
+        // Here we'll get an instance of this controller dispatcher and hand it off to
+        // the Closure so it will be used to resolve the class instances out of our
+        // IoC container instance and call the appropriate methods on the class.
+        $action['controller'] = $action['uses'];
+
+        $closure = $action['uses'];
+
+        return array_set($action, 'uses', $closure);
+    }
+
+    /**
+     * Replace the string action in the given array with a Closure to call.
+     *
+     * @param  array  $action
+     * @return array
+     */
+    public function makeControllerActionClosure(array $action)
+    {
+        $closure = $this->getClassClosure($action['uses']);
+
+        return array_set($action, 'uses', $closure);
+    }
+
+    /**
+     * Create a new Route object.
+     *
+     * @param  array|string $methods
+     * @param  string  $uri
+     * @param  mixed  $action
+     * @return \Illuminate\Routing\Route
+     */
+    protected function newRoute($methods, $uri, $action)
+    {
+        return new Route($methods, $uri, $action);
     }
 }
