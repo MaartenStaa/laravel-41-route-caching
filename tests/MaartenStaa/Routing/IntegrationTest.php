@@ -71,20 +71,20 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->app['env'] = 'testing';
 
         $loader = $this->getMockBuilder('Illuminate\Config\LoaderInterface')
-        	->setMethods(array('load', 'exists', 'getNamespaces', 'cascadePackage'))
-        	->getMockForAbstractClass();
+            ->setMethods(array('load', 'exists', 'getNamespaces', 'cascadePackage'))
+            ->getMockForAbstractClass();
 
         $loader->method('load')
-        	->will($this->returnValue(array()));
+            ->will($this->returnValue(array()));
 
         $loader->method('exists')
-        	->will($this->returnValue(true));
+            ->will($this->returnValue(true));
 
         $loader->method('getNamespaces')
-        	->will($this->returnValue(array()));
+            ->will($this->returnValue(array()));
 
         $loader->method('cascadePackage')
-        	->will($this->returnValue(array()));
+            ->will($this->returnValue(array()));
 
         $this->app['config'] = new Repository($loader, $this->app['env']);
 
@@ -111,26 +111,63 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
      */
     protected function getRouter()
     {
-    	return new Router($this->app['events'], $this->app);
+        return new Router($this->app['events'], $this->app);
     }
 
-	public function testCacheRoutes()
-	{
-		$router = $this->getRouter();
+    public function testCacheRoutes()
+    {
+        $router = $this->getRouter();
 
-		$key = $router->cache(
-			__FILE__,
-			function () use ($router) {
-				$router->get('/', 'HomeController@actionIndex');
-			}
-		);
+        $key = $router->cache(
+            __FILE__,
+            function () use ($router) {
+                $router->get('/', 'HomeController@actionIndex');
+            }
+        );
 
-		$this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
-		$this->assertEquals(1, $router->getRoutes()->count(), 'Routes must be in collection');
+        $this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
+        $this->assertEquals(1, $router->getRoutes()->count(), 'Routes must be in collection');
 
-		$cachedRoutes = unserialize($this->app->cache->get($key));
-		$this->assertArrayHasKey('routes', $cachedRoutes);
-		$this->assertArrayHasKey('GET', $cachedRoutes['routes']);
-		$this->assertCount(1, $cachedRoutes['routes']['GET']);
-	}
+        $cachedRoutes = unserialize($this->app->cache->get($key));
+        $this->assertArrayHasKey('routes', $cachedRoutes);
+        $this->assertArrayHasKey('GET', $cachedRoutes['routes']);
+        $this->assertCount(1, $cachedRoutes['routes']['GET']);
+
+        // Next request should not call the callback.
+        $router = $this->getRouter();
+        $router->cache(
+            __FILE__,
+            function () use ($router) {
+                throw new Exception('This should not be called');
+            }
+        );
+        $this->assertEquals(1, $router->getRoutes()->count(), 'Routes must be obtained from cache');
+    }
+
+    public function testAllMethodsWorks()
+    {
+        $methods = array('get', 'post', 'put', 'patch', 'delete');
+
+        $router = $this->getRouter();
+
+        $key = $router->cache(
+            __FILE__,
+            function () use ($router, $methods) {
+                foreach ($methods as $method) {
+                    $router->$method('/', 'HomeController@action' . ucfirst($method));
+                }
+            }
+        );
+
+        $this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
+        $this->assertEquals(count($methods), $router->getRoutes()->count(), 'Routes must be in collection');
+
+        $cachedRoutes = unserialize($this->app->cache->get($key));
+        $this->assertArrayHasKey('routes', $cachedRoutes);
+
+        foreach ($methods as $method) {
+            $this->assertArrayHasKey(strtoupper($method), $cachedRoutes['routes']);
+            $this->assertCount(1, $cachedRoutes['routes'][strtoupper($method)]);
+        }
+    }
 }

@@ -75,7 +75,7 @@ class RouteCollection extends LaravelRouteCollection
      */
     public function restoreRouteCollection()
     {
-        $this->restoreRoutes($this->backup);
+        $this->restoreRoutes($this->getBackup());
     }
 
     /**

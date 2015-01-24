@@ -98,7 +98,7 @@ class Router extends LaravelRouter
      */
     protected function getControllerAction($action)
     {
-        if (is_string($action)) {
+        if (is_string($action) === true) {
             $action = array('uses' => $action);
         }
 
@@ -122,7 +122,7 @@ class Router extends LaravelRouter
     /**
      * Replace the string action in the given array with a Closure to call.
      *
-     * @param  array  $action
+     * @param  array $action
      * @return array
      */
     public function makeControllerActionClosure(array $action)
@@ -135,9 +135,9 @@ class Router extends LaravelRouter
     /**
      * Create a new Route object.
      *
-     * @param  array|string $methods
-     * @param  string  $uri
-     * @param  mixed  $action
+     * @param  array|string              $methods
+     * @param  string                    $uri
+     * @param  mixed                     $action
      * @return \Illuminate\Routing\Route
      */
     protected function newRoute($methods, $uri, $action)
