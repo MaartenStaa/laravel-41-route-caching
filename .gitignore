@@ -1,6 +1,7 @@
 /vendor
 composer.lock
 composer.phar
+coverage.clover
 .DS_Store
 Thumbs.db
 *.sublime-project
