@@ -65,13 +65,7 @@ class RouteCollection extends LaravelRouteCollection
      */
     public function restoreRouteCollection()
     {
-        foreach ($this->backup as $k => $v) {
-            if ($k == 'routes') {
-                $this->$k = $this->mergeGroupedRoutes($v, $this->$k);
-            } else {
-                $this->$k = $this->mergeRoutes($v, $this->$k);
-            }
-        }
+        $this->restoreRoutes($this->backup);
     }
 
     /**
@@ -91,7 +85,7 @@ class RouteCollection extends LaravelRouteCollection
      */
     public function getCacheableRouteContents()
     {
-        return array_except(get_object_vars($this), 'backup');
+        return array_except(get_object_vars($this), array('backup'));
     }
 
     /**
@@ -101,10 +95,20 @@ class RouteCollection extends LaravelRouteCollection
      */
     public function restoreRouteCache($cache)
     {
-        $cache = unserialize($cache);
+        $routes = unserialize($cache);
 
+        $this->restoreRoutes($routes);
+    }
+
+    /**
+     * Add a set of routes back into this collection.
+     *
+     * @param array $routes
+     */
+    protected function restoreRoutes($routes)
+    {
         foreach ($cache as $k => $v) {
-            if ($k == 'routes') {
+            if ($k === 'routes') {
                 $this->$k = $this->mergeGroupedRoutes($this->$k, $v);
             } else {
                 $this->$k = $this->mergeRoutes($this->$k, $v);
@@ -123,10 +127,10 @@ class RouteCollection extends LaravelRouteCollection
     {
         $methods = array('GET', 'POST', 'HEAD', 'PATH', 'PUT');
         foreach ($methods as $method) {
-            if (!isset($r2[$method])) {
+            if (isset($r2[$method]) === false) {
                 continue;
             }
-            if (!isset($r1[$method])) {
+            if (isset($r1[$method]) === false) {
                 $r1[$method] = array();
             }
 

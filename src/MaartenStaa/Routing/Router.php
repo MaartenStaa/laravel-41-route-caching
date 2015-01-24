@@ -44,9 +44,8 @@ class Router extends LaravelRouter
     /**
      * Create a new Router instance.
      *
-     * @param  \Illuminate\Events\Dispatcher  $events
-     * @param  \Illuminate\Container\Container  $container
-     * @return void
+     * @param \Illuminate\Events\Dispatcher        $events
+     * @param \Illuminate\Container\Container|null $container
      */
     public function __construct(Dispatcher $events, Container $container = null)
     {
