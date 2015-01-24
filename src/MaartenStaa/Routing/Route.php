@@ -66,7 +66,7 @@ class Route extends LaravelRoute
      * Set a regular expression requirement on the route.
      *
      * @param  array|string              $name
-     * @param  string                    $expression
+     * @param  string|null               $expression
      * @return \Illuminate\Routing\Route
      */
     public function where($name, $expression = null)

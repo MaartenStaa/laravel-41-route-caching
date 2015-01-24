@@ -1,4 +1,4 @@
-# Laravel 4.1 Route Caching
+# Laravel 4.1 and 4.2 Route Caching
 
 This package allows you to cache routes in Laravel 4.1 and 4.2.
 
