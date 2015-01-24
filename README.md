@@ -49,7 +49,7 @@ Route::cache(__FILE__, function() {
 This package will save the routes defined in the closure, and write them to your
 cache. On any subsequent requests, it will figure out the closure will not have
 to be executed, and it will load the routes from your cache instead. Since you're
-passing it the name of the file that defines the routes (__FILE__), the script
+passing it the name of the file that defines the routes (`__FILE__`), the script
 will automatically detect when the file has been modified. In other words, you do
 not need to clear your cache after adding a new route.
 
