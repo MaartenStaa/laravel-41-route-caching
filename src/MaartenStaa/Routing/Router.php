@@ -37,7 +37,6 @@
 use Closure;
 use Illuminate\Container\Container;
 use Illuminate\Events\Dispatcher;
-use Illuminate\Routing\Route;
 use Illuminate\Routing\Router as LaravelRouter;
 
 class Router extends LaravelRouter
