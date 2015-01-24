@@ -34,10 +34,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-use ReflectionObject;
-use Illuminate\Http\Request;
 use Illuminate\Routing\RouteCollection as LaravelRouteCollection;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class RouteCollection extends LaravelRouteCollection
 {
