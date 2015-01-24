@@ -1,6 +1,6 @@
 # Laravel 4.1 Route Caching
 
-This package allows you to cache routes in Laravel 4.1.
+This package allows you to cache routes in Laravel 4.1 and 4.2.
 
 [![Build Status](https://travis-ci.org/MaartenStaa/laravel-41-route-caching.svg)](https://travis-ci.org/MaartenStaa/laravel-41-route-caching)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/?branch=master)
