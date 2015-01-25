@@ -169,5 +169,46 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
             $this->assertArrayHasKey(strtoupper($method), $cachedRoutes['routes']);
             $this->assertCount(1, $cachedRoutes['routes'][strtoupper($method)]);
         }
+
+        // Next request should not call the callback.
+        $router = $this->getRouter();
+        $router->cache(
+            __FILE__,
+            function () use ($router) {
+                throw new Exception('This should not be called');
+            }
+        );
+        $this->assertEquals(count($methods), $router->getRoutes()->count(), 'Routes must be obtained from cache');
+    }
+
+    public function testControllerRouting()
+    {
+        $router = $this->getRouter();
+
+        $controllerName = str_shuffle('abcdefghijklmnopqrstuvwxyz');
+
+        // Create a controller class.
+        eval('class ' . $controllerName . ' { public function getHomePage() {} }');
+
+        $key = $router->cache(
+            __FILE__,
+            function () use ($router, $controllerName) {
+                $router->controller('/', $controllerName);
+            }
+        );
+
+        $this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
+        // 2 because controller adds missingMethod
+        $this->assertEquals(2, $router->getRoutes()->count(), 'Routes must be in collection');
+
+        // Next request should not call the callback.
+        $router = $this->getRouter();
+        $router->cache(
+            __FILE__,
+            function () use ($router) {
+                throw new Exception('This should not be called');
+            }
+        );
+        $this->assertEquals(2, $router->getRoutes()->count(), 'Routes must be obtained from cache');
     }
 }
