@@ -37,6 +37,9 @@
 use Illuminate\Cache\CacheManager;
 use Illuminate\Config\Repository;
 use Illuminate\Foundation\Application;
+use Illuminate\Session\SessionManager;
+use Illuminate\Support\Facades\Facade;
+use Symfony\Component\HttpKernel\Client;
 
 class IntegrationTest extends \PHPUnit_Framework_TestCase
 {
@@ -68,6 +71,8 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
     {
         $this->app = $this->createApplication();
 
+        Facade::setFacadeApplication($this->app);
+
         $this->app['env'] = 'testing';
 
         $loader = $this->getMockBuilder('Illuminate\Config\LoaderInterface')
@@ -91,6 +96,9 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->app['cache'] = new CacheManager($this->app);
         $this->app['cache']->setDefaultDriver('array');
 
+        $this->app['session'] = new SessionManager($this->app);
+        $this->app['session']->setDefaultDriver('array');
+
         $this->app->boot();
     }
 
@@ -112,6 +120,17 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
     protected function getRouter()
     {
         return new Router($this->app['events'], $this->app);
+    }
+
+    /**
+     * Create a new HttpKernel client instance.
+     *
+     * @param  array  $server
+     * @return \Symfony\Component\HttpKernel\Client
+     */
+    protected function createClient(array $server = array())
+    {
+        return new Client($this->app, $server);
     }
 
     public function testCacheRoutes()
@@ -188,7 +207,7 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $controllerName = str_shuffle('abcdefghijklmnopqrstuvwxyz');
 
         // Create a controller class.
-        eval('class ' . $controllerName . ' { public function getHomePage() {} }');
+        eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller { public function getHomePage() {} }');
 
         $key = $router->cache(
             __FILE__,
@@ -210,5 +229,41 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
             }
         );
         $this->assertEquals(2, $router->getRoutes()->count(), 'Routes must be obtained from cache');
+    }
+
+    public function testCanDispatchRequest()
+    {
+        // Create a controller class.
+        $controllerName = str_shuffle('abcdefghijklmnopqrstuvwxyz');
+        eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller {
+            public function getIndex() {
+                return Illuminate\Support\Facades\Response::make(1);
+            }
+        }');
+
+        // First, define a route.
+        $router = $this->getRouter();
+        $router->cache(
+            __FILE__,
+            function () use ($router, $controllerName) {
+                $router->get('/', $controllerName . '@getIndex');
+            }
+        );
+
+        // Create a new router, set it on the app, and simulate a request.
+        $this->app['router'] = $this->getRouter();
+        $this->app['router']->cache(
+            __FILE__,
+            function () use ($router) {
+                throw new Exception('This should not be called');
+            }
+        );
+
+        $client = $this->createClient();
+        $client->request('get', '/');
+
+        $response = $client->getResponse();
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
+        $this->assertEquals(1, $response->getContent());
     }
 }
