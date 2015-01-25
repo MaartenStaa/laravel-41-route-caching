@@ -90,6 +90,17 @@ class Router extends LaravelRouter
     }
 
     /**
+     * Determine if the action is routing to a controller.
+     *
+     * @param  array  $action
+     * @return bool
+     */
+    public function routingToController($action)
+    {
+        return parent::routingToController($action);
+    }
+
+    /**
      * Add a controller based route action to the action array.
      *
      * @param  array|string  $action

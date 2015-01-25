@@ -47,7 +47,9 @@ class Route extends LaravelRoute
     {
         $app = app();
 
-        $this->action = $app['router']->makeControllerActionClosure($this->action);
+        if ($app['router']->routingToController($this->action) === true) {
+            $this->action = $app['router']->makeControllerActionClosure($this->action);
+        }
 
         return parent::run();
     }

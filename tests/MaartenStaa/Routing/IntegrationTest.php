@@ -268,4 +268,23 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
         $this->assertEquals(1, $response->getContent());
     }
+
+    public function testCanRouteToClosure()
+    {
+        // Create a new router, set it on the app, and simulate a request.
+        $this->app['router'] = $this->getRouter();
+        $this->app['router']->get(
+            '/',
+            function () {
+                return 1;
+            }
+        );
+
+        $client = $this->createClient();
+        $client->request('get', '/');
+
+        $response = $client->getResponse();
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
+        $this->assertEquals(1, $response->getContent());
+    }
 }
