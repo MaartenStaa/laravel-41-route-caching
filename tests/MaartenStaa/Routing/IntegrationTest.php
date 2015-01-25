@@ -75,6 +75,8 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
 
         $this->app['env'] = 'testing';
 
+        $this->app['path.storage'] = __DIR__;
+
         $loader = $this->getMockBuilder('Illuminate\Config\LoaderInterface')
             ->setMethods(array('load', 'exists', 'getNamespaces', 'cascadePackage'))
             ->getMockForAbstractClass();
