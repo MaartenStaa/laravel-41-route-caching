@@ -73,7 +73,7 @@ class Router extends LaravelRouter
     public function cache($filename, Closure $callback, $cacheMinutes = 1440)
     {
         $cacher = $this->container['cache'];
-        $cacheKey = 'routes.cache.'.$this->cacheVersion.'.'.md5($filename).filemtime($filename);
+        $cacheKey = $this->getCacheKey($filename);
 
         // Check if the current route group is cached.
         if (($cache = $cacher->get($cacheKey)) !== null) {
@@ -94,6 +94,17 @@ class Router extends LaravelRouter
         }
 
         return $cacheKey;
+    }
+
+    /**
+     * Get the key under which the routes cache for the given file should be stored.
+     *
+     * @param  string $filename
+     * @return string
+     */
+    protected function getCacheKey($filename)
+    {
+        return 'routes.cache.'.$this->cacheVersion.'.'.md5($filename).filemtime($filename);
     }
 
     /**
