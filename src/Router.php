@@ -42,6 +42,13 @@ use Illuminate\Routing\Router as LaravelRouter;
 class Router extends LaravelRouter
 {
     /**
+     * Version of the cache key
+     *
+     * @var string
+     */
+    protected $cacheVersion = 'v1';
+
+    /**
      * Create a new Router instance.
      *
      * @param \Illuminate\Events\Dispatcher        $events
@@ -66,7 +73,7 @@ class Router extends LaravelRouter
     public function cache($filename, Closure $callback, $cacheMinutes = 1440)
     {
         $cacher = $this->container['cache'];
-        $cacheKey = 'routes.cache.v1.'.md5($filename).filemtime($filename);
+        $cacheKey = 'routes.cache.'.$this->cacheVersion.'.'.md5($filename).filemtime($filename);
 
         // Check if the current route group is cached.
         if (($cache = $cacher->get($cacheKey)) !== null) {
