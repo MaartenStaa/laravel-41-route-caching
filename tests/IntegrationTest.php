@@ -96,10 +96,11 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->app['config'] = new Repository($loader, $this->app['env']);
 
         $this->app['cache'] = new CacheManager($this->app);
-        $this->app['cache']->setDefaultDriver('array');
+        $this->app['config']['cache.driver'] = 'array';
 
         $this->app['session'] = new SessionManager($this->app);
-        $this->app['session']->setDefaultDriver('array');
+        $this->app['config']['session.driver'] = 'array';
+        $this->app['session.store'] = $this->app['session']->driver();
 
         $this->app->boot();
     }

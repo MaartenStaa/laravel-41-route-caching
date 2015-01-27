@@ -39,6 +39,13 @@ use Illuminate\Routing\Route as LaravelRoute;
 class Route extends LaravelRoute
 {
     /**
+     * Whether routes should be compiled. Laravel version dependent.
+     *
+     * @var null|bool
+     */
+    public static $shouldCompileRoute = null;
+
+    /**
      * Run the route action and return the response.
      *
      * @return mixed
@@ -55,10 +62,30 @@ class Route extends LaravelRoute
     }
 
     /**
+     * Determines whether routes should be compiled. Caches the value at a class
+     * level.
+     *
+     * @return bool
+     */
+    protected function shouldCompile()
+    {
+        if (static::$shouldCompileRoute === null) {
+            // If the compiled variable exists, we should compile.
+            static::$shouldCompileRoute = array_key_exists('compiled', get_object_vars($this));
+        }
+
+        return static::$shouldCompileRoute;
+    }
+
+    /**
      * Compile the route into a Symfony CompiledRoute instance.
      */
     protected function compileRoute()
     {
+        if ($this->shouldCompile() === false) {
+            return;
+        }
+
         if ($this->compiled === null) {
             parent::compileRoute();
         }

@@ -161,6 +161,41 @@ class Router extends LaravelRouter
     }
 
     /**
+     * Create a new route instance.
+     *
+     * @param  array|string  $methods
+     * @param  string  $uri
+     * @param  mixed   $action
+     * @return \Illuminate\Routing\Route
+     */
+    protected function createRoute($methods, $uri, $action)
+    {
+        // If the route is routing to a controller we will parse the route action into
+        // an acceptable array format before registering it and creating this route
+        // instance itself. We need to build the Closure that will call this out.
+        if ($this->routingToController($action)) {
+            $action = $this->getControllerAction($action);
+        }
+
+        $route = $this->newRoute(
+            $methods,
+            $uri = $this->prefix($uri),
+            $action
+        );
+
+        // If we have groups that need to be merged, we will merge them now after this
+        // route has already been created and is ready to go. After we're done with
+        // the merge we will be ready to return the route back out to the caller.
+        if (empty($this->groupStack) === false) {
+            $this->mergeController($route);
+        }
+
+        $this->addWhereClausesToRoute($route);
+
+        return $route;
+    }
+
+    /**
      * Create a new Route object.
      *
      * @param  array|string              $methods
@@ -171,5 +206,19 @@ class Router extends LaravelRouter
     protected function newRoute($methods, $uri, $action)
     {
         return new Route($methods, $uri, $action);
+    }
+
+    /**
+     * Add the necessary where clauses to the route based on its initial registration.
+     *
+     * @param  \Illuminate\Routing\Route  $route
+     * @return \Illuminate\Routing\Route
+     */
+    protected function addWhereClausesToRoute($route)
+    {
+        $route->where(
+            array_merge($this->patterns, array_get($route->getAction(), 'where', array()))
+        );
+        return $route;
     }
 }
