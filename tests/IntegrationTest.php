@@ -288,4 +288,27 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
         $this->assertEquals(1, $response->getContent());
     }
+
+    public function testCanGroupRoutes()
+    {
+        $router = $this->getRouter();
+
+        $controllerName = str_shuffle('abcdefghijklmnopqrstuvwxyz');
+
+        // Create a controller class.
+        eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller { public function getHomePage() {} }');
+
+        $router->cache(__FILE__, function() use ($controllerName, $router) {
+            $router->group(
+                array('prefix' => 'grouped'),
+                function () use ($router, $controllerName) {
+                    $router->get('/', $controllerName . '@getHomePage');
+                    $router->get('/dashboard', $controllerName . '@getHomePage');
+                }
+            );
+        });
+
+        // 2 routes originating from group closure
+        $this->assertEquals(2, $router->getRoutes()->count(), 'Routes must be in collection');
+    }
 }
