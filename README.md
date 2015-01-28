@@ -2,9 +2,9 @@
 
 This package allows you to cache routes in Laravel 4.1 and 4.2.
 
-[![Build Status](https://travis-ci.org/MaartenStaa/laravel-41-route-caching.svg)](https://travis-ci.org/MaartenStaa/laravel-41-route-caching)
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/?branch=master)
-[![Code Coverage](https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/?branch=master)
+[![Build Status](https://travis-ci.org/MaartenStaa/laravel-41-route-caching.svg)][1]
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/badges/quality-score.png?b=master)][2]
+[![Code Coverage](https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/badges/coverage.png?b=master)][3]
 
 ## Installation
 
@@ -75,3 +75,19 @@ Route::get('/', function () {
 You can only use it to serialize routes to a controller. If your `app/routes.php`
 file has both, you can of course put all controller routes in a `cache` call,
 and any routes that use closures outside of it.
+
+## Contributing
+
+### Coding standard
+
+All code is to follow the [PSR-2][4] coding standard.
+
+### Unit tests
+
+If you find a bug, feel free to send a pull request to fix it, but make sure to
+always include a regression test.
+
+[1]: https://travis-ci.org/MaartenStaa/laravel-41-route-caching
+[2]: https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/?branch=master
+[3]: https://scrutinizer-ci.com/g/MaartenStaa/laravel-41-route-caching/?branch=master
+[4]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md
