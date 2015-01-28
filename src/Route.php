@@ -82,11 +82,7 @@ class Route extends LaravelRoute
      */
     protected function compileRoute()
     {
-        if ($this->shouldCompile() === false) {
-            return;
-        }
-
-        if ($this->compiled === null) {
+        if ($this->shouldCompile() === true && $this->compiled === null) {
             parent::compileRoute();
         }
     }
