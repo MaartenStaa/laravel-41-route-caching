@@ -296,7 +296,11 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $controllerName = str_shuffle('abcdefghijklmnopqrstuvwxyz');
 
         // Create a controller class.
-        eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller { public function getHomePage() {} }');
+        eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller {
+            public function getHomePage() {
+                return Illuminate\Support\Facades\Response::make(1);
+            }
+        }');
 
         $router->cache(__FILE__, function() use ($controllerName, $router) {
             $router->group(
@@ -307,6 +311,16 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
                 }
             );
         });
+
+        //request simulation
+        $this->app['router'] = $router;
+
+        $client = $this->createClient();
+        $client->request('GET', '/grouped/dashboard');
+
+        $response = $client->getResponse();
+        $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
+        $this->assertEquals(1, $response->getContent());
 
         // 2 routes originating from group closure
         $this->assertEquals(2, $router->getRoutes()->count(), 'Routes must be in collection');
