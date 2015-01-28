@@ -140,12 +140,9 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
     {
         $router = $this->getRouter();
 
-        $key = $router->cache(
-            __FILE__,
-            function () use ($router) {
-                $router->get('/', 'HomeController@actionIndex');
-            }
-        );
+        $key = $router->cache(__FILE__, function () use ($router) {
+            $router->get('/', 'HomeController@actionIndex');
+        });
 
         $this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
         $this->assertEquals(1, $router->getRoutes()->count(), 'Routes must be in collection');
@@ -157,12 +154,9 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Next request should not call the callback.
         $router = $this->getRouter();
-        $router->cache(
-            __FILE__,
-            function () use ($router) {
-                throw new Exception('This should not be called');
-            }
-        );
+        $router->cache(__FILE__, function () use ($router) {
+            throw new Exception('This should not be called');
+        });
         $this->assertEquals(1, $router->getRoutes()->count(), 'Routes must be obtained from cache');
     }
 
@@ -172,14 +166,11 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
 
         $router = $this->getRouter();
 
-        $key = $router->cache(
-            __FILE__,
-            function () use ($router, $methods) {
-                foreach ($methods as $method) {
-                    $router->$method('/', 'HomeController@action' . ucfirst($method));
-                }
+        $key = $router->cache(__FILE__, function () use ($router, $methods) {
+            foreach ($methods as $method) {
+                $router->$method('/', 'HomeController@action' . ucfirst($method));
             }
-        );
+        });
 
         $this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
         $this->assertEquals(count($methods), $router->getRoutes()->count(), 'Routes must be in collection');
@@ -194,12 +185,9 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Next request should not call the callback.
         $router = $this->getRouter();
-        $router->cache(
-            __FILE__,
-            function () use ($router) {
-                throw new Exception('This should not be called');
-            }
-        );
+        $router->cache(__FILE__, function () use ($router) {
+            throw new Exception('This should not be called');
+        });
         $this->assertEquals(count($methods), $router->getRoutes()->count(), 'Routes must be obtained from cache');
     }
 
@@ -212,12 +200,9 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         // Create a controller class.
         eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller { public function getHomePage() {} }');
 
-        $key = $router->cache(
-            __FILE__,
-            function () use ($router, $controllerName) {
-                $router->controller('/', $controllerName);
-            }
-        );
+        $key = $router->cache(__FILE__, function () use ($router, $controllerName) {
+            $router->controller('/', $controllerName);
+        });
 
         $this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
         // 2 because controller adds missingMethod
@@ -225,12 +210,9 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
 
         // Next request should not call the callback.
         $router = $this->getRouter();
-        $router->cache(
-            __FILE__,
-            function () use ($router) {
-                throw new Exception('This should not be called');
-            }
-        );
+        $router->cache(__FILE__, function () use ($router) {
+            throw new Exception('This should not be called');
+        });
         $this->assertEquals(2, $router->getRoutes()->count(), 'Routes must be obtained from cache');
     }
 
@@ -246,21 +228,15 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
 
         // First, define a route.
         $router = $this->getRouter();
-        $router->cache(
-            __FILE__,
-            function () use ($router, $controllerName) {
-                $router->get('/', $controllerName . '@getIndex');
-            }
-        );
+        $router->cache(__FILE__, function () use ($router, $controllerName) {
+            $router->get('/', $controllerName . '@getIndex');
+        });
 
         // Create a new router, set it on the app, and simulate a request.
         $this->app['router'] = $this->getRouter();
-        $this->app['router']->cache(
-            __FILE__,
-            function () use ($router) {
-                throw new Exception('This should not be called');
-            }
-        );
+        $this->app['router']->cache(__FILE__, function () use ($router) {
+            throw new Exception('This should not be called');
+        });
 
         $client = $this->createClient();
         $client->request('get', '/');
@@ -274,12 +250,9 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
     {
         // Create a new router, set it on the app, and simulate a request.
         $this->app['router'] = $this->getRouter();
-        $this->app['router']->get(
-            '/',
-            function () {
-                return 1;
-            }
-        );
+        $this->app['router']->get('/', function () {
+            return 1;
+        });
 
         $client = $this->createClient();
         $client->request('get', '/');
@@ -312,8 +285,14 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
             );
         });
 
-        //request simulation
-        $this->app['router'] = $router;
+        // 2 routes originating from group closure
+        $this->assertEquals(2, $router->getRoutes()->count(), 'Routes must be in collection');
+
+        // Create a new router, set it on the app, and simulate a request.
+        $this->app['router'] = $this->getRouter();
+        $this->app['router']->cache(__FILE__, function () use ($router) {
+            throw new Exception('This should not be called');
+        });
 
         $client = $this->createClient();
         $client->request('GET', '/grouped/dashboard');
@@ -321,8 +300,5 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $response = $client->getResponse();
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
         $this->assertEquals(1, $response->getContent());
-
-        // 2 routes originating from group closure
-        $this->assertEquals(2, $router->getRoutes()->count(), 'Routes must be in collection');
     }
 }
