@@ -3,7 +3,9 @@ filter:
         - tests/*
 
 tools:
-    external_code_coverage: true
+    external_code_coverage:
+        timeout: 900
+        runs: 4
 
 checks:
     php:
