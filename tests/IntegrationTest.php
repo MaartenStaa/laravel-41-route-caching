@@ -301,4 +301,49 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
         $this->assertEquals(1, $response->getContent());
     }
+
+    /**
+     * @expectedException Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    public function testCanChainWheres()
+    {
+        $this->app['router'] = $this->getRouter();
+        $this->app['router']->get('/{foo}/{bar}', function () {
+            return 'baz';
+        })->where('foo', '\w+')->where('bar', '\d+');
+
+        // /herp/derp should not match above route.
+        $client = $this->createClient();
+        $client->request('GET', '/herp/derp');
+    }
+
+    /**
+     * @expectedException Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     */
+    public function testWheresRetainedInCache()
+    {
+        // Create a controller class.
+        $controllerName = str_shuffle('abcdefghijklmnopqrstuvwxyz');
+        eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller {
+            public function getIndex() {
+                return Illuminate\Support\Facades\Response::make(1);
+            }
+        }');
+
+        // First, define a route.
+        $router = $this->getRouter();
+        $router->cache(__FILE__, function () use ($router, $controllerName) {
+            $router->get('/{foo}/{bar}', $controllerName . '@getIndex')->where('foo', '\w+')->where('bar', '\d+');
+        });
+
+        // Create a new router, set it on the app, and simulate a request.
+        $this->app['router'] = $this->getRouter();
+        $this->app['router']->cache(__FILE__, function () use ($router) {
+            throw new Exception('This should not be called');
+        });
+
+        // /herp/derp should not match above route.
+        $client = $this->createClient();
+        $client->request('GET', '/herp/derp');
+    }
 }
