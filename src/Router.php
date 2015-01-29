@@ -173,7 +173,7 @@ class Router extends LaravelRouter
         // If the route is routing to a controller we will parse the route action into
         // an acceptable array format before registering it and creating this route
         // instance itself. We need to build the Closure that will call this out.
-        if ($this->routingToController($action)) {
+        if ($this->routingToController($action) === true) {
             $action = $this->getControllerAction($action);
         }
 
