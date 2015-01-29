@@ -38,13 +38,13 @@ use Illuminate\Routing\RouteCollection as LaravelRouteCollection;
 
 class RouteCollection extends LaravelRouteCollection
 {
-	/**
-	 * A backup of the routes we had before clearing the collection in order to
-	 * cache a part of the complete list of routes. The list of routes is put into
-	 * the backup, new routes are defined and cached, and the backup is added back.
-	 *
-	 * @var array
-	 */
+    /**
+     * A backup of the routes we had before clearing the collection in order to
+     * cache a part of the complete list of routes. The list of routes is put into
+     * the backup, new routes are defined and cached, and the backup is added back.
+     *
+     * @var array
+     */
     protected $backup;
 
     /**
@@ -75,7 +75,7 @@ class RouteCollection extends LaravelRouteCollection
      */
     public function restoreRouteCollection()
     {
-        $this->restoreRoutes($this->getBackup());
+        $this->restoreRoutes($this->getBackup(), true);
     }
 
     /**
@@ -113,15 +113,20 @@ class RouteCollection extends LaravelRouteCollection
     /**
      * Add a set of routes back into this collection.
      *
+     * @param bool  $prepend
      * @param array $routes
      */
-    protected function restoreRoutes($routes)
+    protected function restoreRoutes($routes, $prepend = false)
     {
         foreach ($routes as $k => $v) {
             if ($k === 'routes') {
-                $this->$k = $this->mergeGroupedRoutes($this->$k, $v);
+                $this->$k = $prepend === false ?
+                    $this->mergeGroupedRoutes($this->$k, $v) :
+                    $this->mergeGroupedRoutes($v, $this->$k);
             } else {
-                $this->$k = $this->mergeRoutes($this->$k, $v);
+                $this->$k = $prepend === false ?
+                    $this->mergeRoutes($this->$k, $v) :
+                    $this->mergeRoutes($v, $this->$k);
             }
         }
     }
