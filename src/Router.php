@@ -83,7 +83,7 @@ class Router extends LaravelRouter
             $this->routes->saveRouteCollection();
 
             // Call closure to define routes that should be cached.
-            $callback();
+            call_user_func($callback, $this);
 
             // Put routes in cache.
             $cache = $this->routes->getCacheableRoutes();
