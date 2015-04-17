@@ -72,6 +72,15 @@ class Router extends LaravelRouter
      */
     public function cache($filename, Closure $callback, $cacheMinutes = 1440)
     {
+        // If $cacheMinutes is 0 or lower, there is no need to cache anything.
+        if ($cacheMinutes <= 0) {
+            // Call closure to define routes that should be cached.
+            call_user_func($callback, $this);
+
+            // No cache key.
+            return null;
+        }
+
         $cacher = $this->container['cache'];
         $cacheKey = $this->getCacheKey($filename);
 

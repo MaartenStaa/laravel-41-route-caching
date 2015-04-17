@@ -160,6 +160,19 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $router->getRoutes()->count(), 'Routes must be obtained from cache');
     }
 
+    public function testCacheRoutesNoTtl()
+    {
+        $router = $this->getRouter();
+
+        $key = $router->cache(__FILE__, function () use ($router) {
+            $router->get('/', 'HomeController@actionIndex');
+        }, 0);
+
+        $this->assertNull($key, 'Cache key should be null with TTL=0');
+        $this->assertFalse($this->app->cache->has($key), 'Key should not be stored in cache');
+        $this->assertEquals(1, $router->getRoutes()->count(), 'Route must be added to router');
+    }
+
     public function testAllMethodsWorks()
     {
         $methods = array('get', 'post', 'put', 'patch', 'delete');
