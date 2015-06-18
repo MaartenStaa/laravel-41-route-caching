@@ -288,7 +288,7 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
             }
         }');
 
-        $router->cache(__FILE__, function() use ($controllerName, $router) {
+        $router->cache(__FILE__, function () use ($controllerName, $router) {
             $router->group(
                 array('prefix' => 'grouped'),
                 function () use ($router, $controllerName) {
@@ -358,5 +358,28 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         // /herp/derp should not match above route.
         $client = $this->createClient();
         $client->request('GET', '/herp/derp');
+    }
+
+    public function testCanUseResource()
+    {
+        // Create a controller class.
+        $controllerName = str_shuffle('abcdefghijklmnopqrstuvwxyz');
+        eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller { }');
+
+        // First, define a resource.
+        $router = $this->getRouter();
+        $key = $router->cache(__FILE__, function () use ($router, $controllerName) {
+            $router->resource('item', $controllerName);
+        });
+
+        $this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
+        $this->assertEquals(8, $router->getRoutes()->count(), 'Routes must be in collection');
+
+        // Next request should not call the callback.
+        $router = $this->getRouter();
+        $router->cache(__FILE__, function () use ($router) {
+            throw new Exception('This should not be called');
+        });
+        $this->assertEquals(8, $router->getRoutes()->count(), 'Routes must be obtained from cache');
     }
 }
