@@ -106,6 +106,18 @@ class Router extends LaravelRouter
     }
 
     /**
+     * Clear the cached data for the given routes file.
+     *
+     * @param string $filename
+     */
+    public function clearCache($filename)
+    {
+        $cacher = $this->container['cache'];
+
+        $cacher->forget($this->getCacheKey($filename));
+    }
+
+    /**
      * Get the key under which the routes cache for the given file should be stored.
      *
      * @param  string $filename

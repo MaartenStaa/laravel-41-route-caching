@@ -382,4 +382,22 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         });
         $this->assertEquals(8, $router->getRoutes()->count(), 'Routes must be obtained from cache');
     }
+
+    public function testCanClearCache()
+    {
+        // Create a controller class.
+        $controllerName = str_shuffle('abcdefghijklmnopqrstuvwxyz');
+        eval('class ' . $controllerName . ' extends Illuminate\Routing\Controller { }');
+
+        // First, define a route.
+        $router = $this->getRouter();
+        $key = $router->cache(__FILE__, function () use ($router, $controllerName) {
+            $router->get('/{foo}/{bar}', $controllerName . '@getIndex')->where('foo', '\w+')->where('bar', '\d+');
+        });
+        $this->assertTrue($this->app->cache->has($key), 'Routes must be in cache');
+
+        // Next, clear it.
+        $router->clearCache(__FILE__);
+        $this->assertFalse($this->app->cache->has($key), 'Routes must no longer be cached');
+    }
 }
